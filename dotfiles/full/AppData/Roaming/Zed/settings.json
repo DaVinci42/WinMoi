@@ -1,0 +1,20 @@
+{
+  "auto_install_extensions": {
+    "catppuccin": true
+  },
+  "theme": {
+    "mode": "dark",
+    "light": "Catppuccin Mocha",
+    "dark": "Catppuccin Mocha"
+  },
+  "buffer_font_family": "JetBrainsMono NFM",
+  "terminal": {
+    "font_family": "JetBrainsMono NFM",
+    "shell": {
+      "with_arguments": {
+        "program": "D:\\Scoop\\shims\\nu.exe",
+        "args": []
+      }
+    }
+  }
+}

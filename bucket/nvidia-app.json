@@ -1,0 +1,21 @@
+{
+    "version": "11.0.8.299",
+    "description": "The NVIDIA App keeps NVIDIA drivers and technology up to date and provides a unified GPU control center.",
+    "homepage": "https://www.nvidia.com/en-us/software/nvidia-app/",
+    "license": {
+        "identifier": "Proprietary",
+        "url": "https://www.nvidia.com/en-us/about-nvidia/software-license-agreement/"
+    },
+    "url": "https://us.download.nvidia.com/nvapp/client/11.0.8.299/NVIDIA_app_v11.0.8.299.exe#/setup.exe",
+    "hash": "df54c76346a8c4b3d9cc2d65b31d92e68bc0fef73ba0a775ddb53264d7ee75d6",
+    "installer": {
+        "script": "Invoke-ExternalCommand \"$dir\\setup.exe\" -ArgumentList @('-s', '-noreboot', '-noeula', '-nofinish', '-nosplash') -RunAs | Out-Null"
+    },
+    "checkver": {
+        "url": "https://www.nvidia.com/en-us/software/nvidia-app.md",
+        "regex": "https://us\\.download\\.nvidia\\.com/nvapp/client/(?<version>\\d+(?:\\.\\d+){3})/NVIDIA_app_v[\\d.]+\\.exe"
+    },
+    "autoupdate": {
+        "url": "https://us.download.nvidia.com/nvapp/client/$version/NVIDIA_app_v$version.exe#/setup.exe"
+    }
+}

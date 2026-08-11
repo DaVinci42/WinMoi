@@ -1,0 +1,52 @@
+scoop_root = "D:/Scoop"
+
+buckets = [
+  "extras|https://github.com/ScoopInstaller/Extras.git",
+  "games|https://github.com/Calinou/scoop-games.git",
+  "versions|https://github.com/ScoopInstaller/Versions.git",
+  "nerd-fonts|https://github.com/matthewjberger/scoop-nerd-fonts.git",
+  "charm|https://github.com/charmbracelet/scoop-bucket.git",
+  "winmoi|https://github.com/DaVinci42/WinMoi.git",
+]
+
+core_packages = [
+  "main/7zip",
+  "main/chezmoi",
+  "main/gh",
+  "main/git",
+  "main/innounp",
+  "main/microsoft-coreutils",
+  "main/nodejs-lts",
+  "main/nu",
+  "main/pwsh",
+  "main/starship",
+  "main/zoxide",
+
+  "extras/carapace-bin",
+  "extras/windows-terminal",
+
+  "nerd-fonts/JetBrainsMono-NF",
+
+  "charm/crush",
+
+  "winmoi/skills",
+]
+
+full_packages = [
+  "main/scoop-search",
+  "extras/cheat-engine",
+  "extras/clash-party",
+  "extras/hibit-uninstaller",
+  "extras/localsend",
+  "extras/treesize-free",
+  "extras/unigetui",
+  "extras/zed",
+  "extras/zen-browser",
+
+  "games/steam",
+  "games/steam-achievement-manager",
+
+  "winmoi/adguard",
+  "winmoi/fluentcleaner",
+  "winmoi/nvidia-app",
+]

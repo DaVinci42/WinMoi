@@ -1,0 +1,24 @@
+{
+    "version": "1.5.22",
+    "description": "CLI for the open agent skills ecosystem.",
+    "homepage": "https://skills.sh",
+    "license": "MIT",
+    "depends": "nodejs-lts",
+    "url": "https://registry.npmjs.org/skills/-/skills-1.5.22.tgz",
+    "hash": "10cee39139debe6c0188f4727194ade59234b277ccca2320e3ed6b620ee7f14b",
+    "installer": {
+        "script": [
+            "Push-Location \"$dir\\package\"",
+            "try { npm install --omit=dev --ignore-scripts --no-audit --no-fund } finally { Pop-Location }",
+            "Set-Content -Path \"$dir\\skills.cmd\" -Value '@node \"%~dp0package\\bin\\cli.mjs\" %*' -Encoding ascii"
+        ]
+    },
+    "bin": "skills.cmd",
+    "checkver": {
+        "url": "https://registry.npmjs.org/skills/latest",
+        "jsonpath": "$.version"
+    },
+    "autoupdate": {
+        "url": "https://registry.npmjs.org/skills/-/skills-$version.tgz"
+    }
+}
