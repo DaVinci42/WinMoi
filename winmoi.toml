@@ -16,7 +16,7 @@ core_packages = [
   "main/git",
   "main/innounp",
   "main/microsoft-coreutils",
-  "main/nodejs-lts",
+  "main/nodejs",
   "main/nu",
   "main/pwsh",
   "main/starship",
