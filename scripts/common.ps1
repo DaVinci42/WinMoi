@@ -102,6 +102,54 @@ function Read-WinMoiManifest {
         throw "mise.toml must contain at least one core Scoop package in [bootstrap.packages]."
     }
 
+    $localPackages = @()
+    $localPackagesPath = Join-Path $projectRoot "scoop.local.txt"
+    if (Test-Path -LiteralPath $localPackagesPath) {
+        $knownPackages = @{}
+        foreach ($package in ($corePackages + $fullPackages)) {
+            $knownPackages[$package.Split('/')[-1]] = $package
+        }
+        $lineNumber = 0
+        foreach ($line in (Get-Content -LiteralPath $localPackagesPath -Encoding UTF8 -ErrorAction Stop)) {
+            $lineNumber++
+            $package = ($line -split '#', 2)[0].Trim()
+            if (-not $package) {
+                continue
+            }
+            $package = $package -replace '^scoop:', ''
+            if ($package -notmatch '^[a-zA-Z0-9][a-zA-Z0-9._-]*(/[a-zA-Z0-9][a-zA-Z0-9._-]*)?$') {
+                throw "Invalid Scoop package ID in '${localPackagesPath}' at line ${lineNumber}: '$package'. Use 'bucket/package' or 'package'."
+            }
+            $name = $package.Split('/')[-1]
+            if ($knownPackages.ContainsKey($name)) {
+                $knownPackage = $knownPackages[$name]
+                if ($package.Contains('/') -and -not $knownPackage.Contains('/')) {
+                    $localPackages = @($localPackages | Where-Object { $_ -ne $knownPackage })
+                    $knownPackages[$name] = $package
+                }
+                elseif ($package.Contains('/') -and $package -ne $knownPackage) {
+                    throw "Conflicting Scoop package IDs in '${localPackagesPath}' at line ${lineNumber}: '$package' and '$knownPackage'."
+                }
+                else {
+                    $package = $knownPackage
+                }
+            }
+            else {
+                $knownPackages[$name] = $package
+            }
+            if ($package -notin $localPackages) {
+                $localPackages += $package
+            }
+        }
+    }
+
+    $packages = $corePackages + $(if ($Core) { @() } else { $fullPackages })
+    foreach ($package in $localPackages) {
+        if ($package -notin $packages) {
+            $packages += $package
+        }
+    }
+
     $dotfilesSectionMatch = [regex]::Match($content, '(?ms)^\[dotfiles\]\s*(.*?)(?=^\[|\z)')
     $dotfiles = @()
     if ($dotfilesSectionMatch.Success) {
@@ -129,7 +177,8 @@ function Read-WinMoiManifest {
         Buckets = $buckets
         CorePackages = $corePackages
         FullPackages = $fullPackages
-        Packages = $corePackages + $(if ($Core) { @() } else { $fullPackages })
+        LocalPackages = $localPackages
+        Packages = $packages
         Dotfiles = $dotfiles
     }
 }

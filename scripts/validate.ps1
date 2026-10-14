@@ -25,7 +25,10 @@ foreach ($manifestFile in $manifests) {
         throw "Self-hosted manifest '$($manifestFile.Name)' is not declared as 'scoop:$package' in mise.toml."
     }
 
-    $installedManifestPath = Join-Path $scoopRoot "apps/$($manifestFile.BaseName)/current/manifest.json"
+    $installedManifestPath = Join-Path $scoopRoot "apps/$($manifestFile.BaseName)/current/scoop-manifest.json"
+    if (-not (Test-Path $installedManifestPath)) {
+        $installedManifestPath = Join-Path $scoopRoot "apps/$($manifestFile.BaseName)/current/manifest.json"
+    }
     if (Test-Path $installedManifestPath) {
         $installedVersion = (Get-Content -Raw $installedManifestPath | ConvertFrom-Json).version
         if ($installedVersion -ne $manifest.version) {

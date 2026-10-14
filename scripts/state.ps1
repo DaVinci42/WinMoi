@@ -28,7 +28,7 @@ else {
     @()
 }
 $missingPackages = @($declaredPackages | Where-Object { $_ -notin $installedPackages } | Sort-Object)
-$allDeclaredPackages = @(($manifest.CorePackages + $manifest.FullPackages) | ForEach-Object { $_.Split('/', 2)[-1] })
+$allDeclaredPackages = @(($manifest.CorePackages + $manifest.FullPackages + $manifest.LocalPackages) | ForEach-Object { $_.Split('/', 2)[-1] })
 $extraPackages = @($installedPackages | Where-Object { $_ -notin $allDeclaredPackages } | Sort-Object)
 
 $configDrift = @()

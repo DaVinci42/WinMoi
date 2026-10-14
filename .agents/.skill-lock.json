@@ -16,18 +16,18 @@
       "sourceType": "github",
       "sourceUrl": "https://github.com/ayghri/i-have-adhd.git",
       "skillPath": "skills/i-have-adhd/SKILL.md",
-      "skillFolderHash": "871e88cbe9b167670c170c53c8173c68609a2ae9",
+      "skillFolderHash": "759f1e56d0d2fdd3819d2a53b81e72767c08d914",
       "installedAt": "2026-08-12T05:09:26.857Z",
-      "updatedAt": "2026-08-12T05:09:26.857Z"
+      "updatedAt": "2026-10-14T13:53:11.936Z"
     },
     "pua": {
       "source": "tanweai/pua",
       "sourceType": "github",
       "sourceUrl": "https://github.com/tanweai/pua.git",
       "skillPath": "skills/pua/SKILL.md",
-      "skillFolderHash": "6fa9763543b6d343c6d3959046236bd1dd0c09b0",
+      "skillFolderHash": "0f3fe244ecfdb4263345c37c355506d89e9386db",
       "installedAt": "2026-08-12T05:09:30.781Z",
-      "updatedAt": "2026-08-12T05:09:30.781Z"
+      "updatedAt": "2026-10-14T13:55:37.635Z"
     }
   },
   "dismissed": {}

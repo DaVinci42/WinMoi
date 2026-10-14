@@ -196,7 +196,10 @@ function Install-WinMoiPackages {
             if (-not (Test-Path $availableManifest)) {
                 throw "The registered winmoi bucket does not contain '$($resolvedPackage.Name)'."
             }
-            $installedManifest = Join-Path $current "manifest.json"
+            $installedManifest = Join-Path $current "scoop-manifest.json"
+            if (-not (Test-Path $installedManifest)) {
+                $installedManifest = Join-Path $current "manifest.json"
+            }
             $installedVersion = if (Test-Path $installedManifest) {
                 (Get-Content -Raw $installedManifest | ConvertFrom-Json).version
             }

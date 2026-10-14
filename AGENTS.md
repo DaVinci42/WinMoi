@@ -16,6 +16,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 ## Package Management
 
 - `mise.toml` declares the Scoop root (`[env]`), Scoop packages (`[bootstrap.packages]`), tracked dotfiles (`[dotfiles]`), and maintenance tasks (`[tasks.*]`).
+- `scoop.local.txt` next to `mise.toml` is Git-ignored and adds machine-specific Scoop package IDs to both Core and Full. Accept one `bucket/package` or bare package ID per line, optional `scoop:` prefixes, blank lines, and `#` comments. Merge without duplicates, reject conflicting buckets, and include local packages in plan/check/clean declarations. Core must install explicitly listed Full-only packages too.
 - Group newly declared packages by bucket and sort packages within each bucket.
 - Scoop and all managed Scoop applications live at user scope below `<scoop_root>` (`<scoop_root>/apps`, `<scoop_root>/buckets`, `<scoop_root>/shims`, `<scoop_root>/persist`).
 - Installations and updates must use the configured `SCOOP` root. Refuse package changes when Scoop resolves another root.
@@ -72,10 +73,22 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 - Keep the declaration human-readable and minimal.
 - Never silently fall back to another package manager or installation root.
 - Built-in application updaters must not relocate Scoop-managed software. Prefer `mise run up`.
-- NVIDIA App is an accepted exception: Scoop controls package lifecycle operations, while NVIDIA's installer controls its physical path under `C:/Program Files`.
+- NVIDIA App and AdGuard are accepted exceptions: Scoop controls package lifecycle operations, while their vendor installers control physical paths under `C:/Program Files`.
 - Remove only confirmed WinGet duplicates by exact package ID. Never clear `D:/WinGet` while non-migrated software remains.
 - Prefer preview and diff operations before making system changes.
 - Distribute the project under the MIT License.
+
+## Maintenance Diagnostics
+
+- AdGuard's official stable changelog is `https://adguard.com/versions/windows/release.html`. Read the dotted product version from the `versions__item-title` heading, not the `version-*` anchor: anchors concatenate variable-width build components, can omit trailing zeros, and cannot be reliably split. Regression-check consecutive releases (currently 8.0.2, 8.0.1, 8.0.0).
+- AdGuard product versions differ from installer/file build versions. Compare the changelog with `(Get-Item 'C:/Program Files/AdGuard/Adguard.exe').VersionInfo.ProductVersion`; do not infer the installed application version from Scoop's stored manifest or setup.exe. The vendor application may have updated independently.
+- After changing checkver, run `& "$env:SCOOP/apps/scoop/current/bin/checkver.ps1" -App adguard -Dir ./bucket -ThrowError`. For a one-time correction from inflated metadata such as 8.05.560.0 to 8.0.2, use `-ForceUpdate` to refresh the repository manifest and recompute the official setup.exe SHA256; this does not update installed software. Verify Authenticode and never bypass hash checks. The setup URL is mutable, so a hash mismatch requires investigation, not an unconditional retry without verification.
+- `mise run apply` installs missing packages and restores configuration; it does not update installed packages. `mise run up` refreshes checkout manifests, but self-hosted installation/update still reads the separately registered `<SCOOP>/buckets/winmoi` checkout. Local manifest edits are not automatically deployed there. Inspect both copies and their Git state; do not overwrite dirty buckets, rewrite their history, or push without authorization.
+- Ordinary Scoop updates skip numerically lower versions. Correcting AdGuard's inflated installed metadata may require a one-time `scoop update adguard --force` only after the registered bucket contains the reviewed correction. Scoop executes the OLD installed manifest's uninstaller during updates; AdGuard's old uninstaller invokes setup.exe with `-uninstall -quiet` and elevation. Obtain explicit uninstall confirmation and preserve application settings before proceeding. Do not edit installed manifests or version directories merely to make validation pass.
+- Newer Scoop writes `scoop-manifest.json` and `scoop-install.json`; older installs use `manifest.json` and `install.json`. Prefer the new names with legacy fallback when checking installed versions. Inspect install metadata's `url` and `bucket`: an existing local-manifest `url` is reused by `scoop update` even when the declaration names a bucket. On this machine AdGuard updates from the repository's `bucket/adguard.json`. Never assume the registered bucket is the effective source without checking install metadata.
+- Keep configuration backups outside Git under `%LOCALAPPDATA%/WinMoi`. AdGuard's `%ProgramData%/AdGuard/Core` requires elevation; stop its service temporarily for a consistent backup, verify copied configuration hashes, and restart it in `finally`. The confirmed 8.0.2 migration preserved all six `config-*.xml` files byte-for-byte. A manually patched registered bucket remains dirty until explicitly reconciled with the published fix; the safety check in `mise run up` will intentionally refuse it.
+- Verification commands: `mise run apply`, `mise run check`, and `mise run validate` (or `mise run validate -- -SkipLivecheck` for offline checks). `check` checks package presence and configuration, while `validate` checks self-hosted installed manifest versions and livechecks. Neither proves the vendor-installed AdGuard binary matches its metadata; inspect ProductVersion separately. The repository has no dedicated unit-test suite; use isolated PowerShell assertions for parser changes and PowerShell AST parsing for syntax checks, including Windows PowerShell 5.1 bootstrap compatibility.
+- `jq` is a declared Core package. Tool wrappers may require a real executable even when a tool advertises built-in jq; verify `jq --version` before use. If mise reports a missing shim file, inspect `<SCOOP>/shims/mise*` and `<SCOOP>/apps/mise/current/bin/mise.exe`, then use `scoop reset mise` to rebuild its shim. Run the real binary when updating mise itself to avoid locking its shim.
 
 ## Commit History
 
