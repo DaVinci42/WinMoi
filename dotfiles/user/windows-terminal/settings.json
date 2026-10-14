@@ -31,7 +31,7 @@
     ],
     "copyFormatting": "none",
     "copyOnSelect": true,
-    "defaultProfile": "{b2c01b24-9ce4-4e39-8074-14188a5948d2}",
+    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
     "keybindings":
     [
         {
@@ -73,10 +73,10 @@
         "list":
         [
             {
-                "commandline": "D:\\Scoop\\shims\\nu.exe",
-                "guid": "{b2c01b24-9ce4-4e39-8074-14188a5948d2}",
+                "commandline": "pwsh.exe -NoLogo",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
-                "name": "Nushell"
+                "name": "PowerShell"
             },
             {
                 "commandline": "%SystemRoot%\\System32\\cmd.exe",

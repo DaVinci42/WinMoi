@@ -3,13 +3,14 @@ param()
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$ManifestPath = Join-Path $ProjectRoot "winmoi.toml"
+$ManifestPath = Join-Path $ProjectRoot "mise.toml"
 $BucketPath = Join-Path $ProjectRoot "bucket"
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $manifest = Read-WinMoiManifest $ManifestPath
 $scoopRoot = $manifest.ScoopRoot
-$checkver = Join-Path $scoopRoot "Core/apps/scoop/current/bin/checkver.ps1"
+$engineDir = Get-ScoopEngineDir $scoopRoot
+$checkver = Join-Path $engineDir "apps/scoop/current/bin/checkver.ps1"
 if (-not (Test-Path $checkver)) {
     throw "Scoop checkver is not available at '$checkver'."
 }

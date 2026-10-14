@@ -2,12 +2,19 @@
 param(
     [ValidateSet("Plan", "Check", "Clean")]
     [string]$Mode = "Plan",
-    [switch]$Core
+    [switch]$Core,
+    [ValidateSet("core", "full")]
+    [string]$Profile = "full"
 )
+
+if ($Core -and $PSBoundParameters.ContainsKey("Profile") -and $Profile -ne "core") {
+    throw "-Core cannot be combined with -Profile full."
+}
+$Core = $Core -or $Profile -eq "core"
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$ManifestPath = Join-Path $ProjectRoot "winmoi.toml"
+$ManifestPath = Join-Path $ProjectRoot "mise.toml"
 . (Join-Path $PSScriptRoot "common.ps1")
 
 $manifest = Read-WinMoiManifest $ManifestPath -Core:$Core
@@ -21,34 +28,43 @@ else {
     @()
 }
 $missingPackages = @($declaredPackages | Where-Object { $_ -notin $installedPackages } | Sort-Object)
-$extraPackages = @($installedPackages | Where-Object { $_ -notin $declaredPackages } | Sort-Object)
+$allDeclaredPackages = @(($manifest.CorePackages + $manifest.FullPackages) | ForEach-Object { $_.Split('/', 2)[-1] })
+$extraPackages = @($installedPackages | Where-Object { $_ -notin $allDeclaredPackages } | Sort-Object)
 
-$chezmoi = Join-Path $scoopRoot "apps/chezmoi/current/chezmoi.exe"
-if (-not (Test-Path $chezmoi)) {
-    throw "chezmoi is not available at the managed Scoop location '$chezmoi'."
-}
-$configSources = @(
-    (Join-Path $ProjectRoot "dotfiles/user")
-)
-if (-not $Core) {
-    $configSources += Join-Path $ProjectRoot "dotfiles/full"
-}
-$configDrift = @($configSources | ForEach-Object {
-    $status = @(& $chezmoi --source $_ --destination $HOME --no-tty status --include files --path-style absolute)
-    if ($LASTEXITCODE -ne 0) {
-        throw "chezmoi failed to inspect configuration source '$_'."
+$configDrift = @()
+foreach ($dotfile in $manifest.Dotfiles) {
+    if (-not (Test-Path $dotfile.Target)) {
+        $configDrift += "$($dotfile.Target) (missing)"
+        continue
     }
-    $status | Where-Object { $_ } | ForEach-Object { $_.Substring(3) }
-})
-$terminalSource = Join-Path $HOME ".config/windows-terminal/settings.json"
-$terminalTarget = Join-Path $scoopRoot "persist/windows-terminal/settings/settings.json"
-if (-not (Test-Path $terminalSource) -or -not (Test-Path $terminalTarget) -or
-    (Get-FileHash $terminalSource).Hash -ne (Get-FileHash $terminalTarget).Hash) {
-    $configDrift += $terminalTarget
+    $item = Get-Item $dotfile.Target -Force
+    $resolvedTarget = if ($item.Target) { @($item.Target)[0] } else { $null }
+    if ($item.LinkType -ne "SymbolicLink" -or -not $resolvedTarget -or
+        [IO.Path]::GetFullPath($resolvedTarget).TrimEnd('\', '/') -ne $dotfile.Source.TrimEnd('\', '/')) {
+        $configDrift += "$($dotfile.Target) (not a SymbolicLink to '$($dotfile.SourceRelative)')"
+    }
+}
+
+$skillLinks = @(
+    [pscustomobject]@{ Source = Join-Path $ProjectRoot ".agents/skills"; Target = Join-Path $HOME ".agents/skills"; Type = "Junction" },
+    [pscustomobject]@{ Source = Join-Path $ProjectRoot ".agents/.skill-lock.json"; Target = Join-Path $HOME ".agents/.skill-lock.json"; Type = "SymbolicLink" }
+)
+foreach ($link in $skillLinks) {
+    if (-not (Test-Path $link.Source)) {
+        continue
+    }
+    if (-not (Test-Path $link.Target)) {
+        $configDrift += "$($link.Target) (missing $($link.Type))"
+        continue
+    }
+    $item = Get-Item $link.Target -Force
+    if ($item.LinkType -ne $link.Type -or $item.Target -notcontains $link.Source) {
+        $configDrift += "$($link.Target) (not a $($link.Type) to '$($link.Source)')"
+    }
 }
 
 $legacyPathEntries = @()
-foreach ($scope in @("Machine", "User")) {
+foreach ($scope in @("User")) {
     $entries = @([Environment]::GetEnvironmentVariable("Path", $scope) -split ";" | Where-Object { $_ })
     foreach ($entry in $entries) {
         if ($entry -match '(?i)WinGet|Komac') {
@@ -58,35 +74,40 @@ foreach ($scope in @("Machine", "User")) {
 }
 
 $residualFiles = @(
-    (Join-Path $HOME "Documents/PowerShell/Microsoft.PowerShell_profile.ps1")
+    (Join-Path $HOME ".config/windows-terminal")
+    (Join-Path $HOME "AppData/Roaming/nushell")
 ) | Where-Object { Test-Path $_ }
+
 $driftCount = $missingPackages.Count + $extraPackages.Count + $configDrift.Count + $legacyPathEntries.Count + $residualFiles.Count
 
-Write-Host "Missing declared packages: $($missingPackages.Count)"
+Write-Host "Missing declared Scoop packages: $($missingPackages.Count)"
 $missingPackages | ForEach-Object { Write-Host "  + $_" }
 Write-Host "Undeclared Scoop packages: $($extraPackages.Count)"
 $extraPackages | ForEach-Object { Write-Host "  - $_" }
-Write-Host "Configuration drift: $($configDrift.Count)"
+Write-Host "Configuration (dotfile symlink) drift: $($configDrift.Count)"
 $configDrift | ForEach-Object { Write-Host "  ~ $_" }
 Write-Host "Legacy PATH entries: $($legacyPathEntries.Count)"
 $legacyPathEntries | ForEach-Object { Write-Host "  - [$($_.Scope)] $($_.Path)" }
-Write-Host "Residual files: $($residualFiles.Count)"
+Write-Host "Residual files/directories: $($residualFiles.Count)"
 $residualFiles | ForEach-Object { Write-Host "  - $_" }
 
 if ($Mode -eq "Clean") {
-    $scoop = Join-Path $scoopRoot "Core/shims/scoop.ps1"
+    $engineDir = Get-ScoopEngineDir $scoopRoot
+    $scoop = Join-Path $engineDir "shims/scoop.ps1"
+    Assert-ScoopRoot $scoopRoot
+    $env:SCOOP = $scoopRoot
     foreach ($package in $extraPackages) {
         $answer = Read-Host "Uninstall undeclared Scoop package '$package'? [y/N]"
         if ($answer -notin @("y", "Y")) {
             continue
         }
-        & $scoop uninstall --global $package
+        & $scoop uninstall $package
         if ($LASTEXITCODE -ne 0) {
             throw "Scoop failed to uninstall '$package'."
         }
     }
 
-    foreach ($scope in @("Machine", "User")) {
+    foreach ($scope in @("User")) {
         $scopeEntries = @($legacyPathEntries | Where-Object { $_.Scope -eq $scope })
         if ($scopeEntries.Count -eq 0) {
             continue
@@ -102,21 +123,21 @@ if ($Mode -eq "Clean") {
     }
 
     foreach ($file in $residualFiles) {
-        $answer = Read-Host "Remove residual file '$file'? [y/N]"
+        $answer = Read-Host "Remove residual path '$file'? [y/N]"
         if ($answer -in @("y", "Y")) {
-            Remove-Item $file -Force
+            Remove-Item $file -Recurse -Force
         }
     }
 
-    Write-Host "Cleanup finished. Run 'winmoi check' to verify the remaining drift."
+    Write-Host "Cleanup finished. Run 'mise run check' to verify the remaining drift."
     exit 0
 }
 
 if ($Mode -eq "Check" -and $driftCount -gt 0) {
-    Write-Error "WinMoi found $driftCount state differences. Run 'winmoi plan' for details or 'winmoi apply' to restore declared state."
+    Write-Error "Found $driftCount state differences. Run 'mise run plan' for details or 'mise run apply' to restore declared state."
     exit 1
 }
 
 if ($driftCount -eq 0) {
-    Write-Host "Actual state matches the WinMoi declaration."
+    Write-Host "Actual state matches the mise.toml declaration."
 }

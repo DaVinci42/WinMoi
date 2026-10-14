@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$ManifestPath = Join-Path $ProjectRoot "winmoi.toml"
+$ManifestPath = Join-Path $ProjectRoot "mise.toml"
 $BucketPath = Join-Path $ProjectRoot "bucket"
 . (Join-Path $PSScriptRoot "common.ps1")
 
@@ -22,7 +22,7 @@ foreach ($manifestFile in $manifests) {
 
     $package = "winmoi/$($manifestFile.BaseName)"
     if ($package -notin $selfHostedPackages) {
-        throw "Self-hosted manifest '$($manifestFile.Name)' is not declared as '$package' in winmoi.toml."
+        throw "Self-hosted manifest '$($manifestFile.Name)' is not declared as 'scoop:$package' in mise.toml."
     }
 
     $installedManifestPath = Join-Path $scoopRoot "apps/$($manifestFile.BaseName)/current/manifest.json"
@@ -41,20 +41,25 @@ foreach ($package in $selfHostedPackages) {
     }
 }
 
-Assert-ScoopGlobalRoot $scoopRoot
-
-$shimPath = (Join-Path $scoopRoot "shims").TrimEnd('\', '/')
-foreach ($scope in @("Machine", "User")) {
-    $pathEntries = @([Environment]::GetEnvironmentVariable("Path", $scope) -split ";" | Where-Object { $_ })
-    $shimIndex = [array]::FindIndex($pathEntries, [Predicate[string]] { param($entry) $entry.TrimEnd('\', '/') -eq $shimPath })
-    $winGetIndex = [array]::FindIndex($pathEntries, [Predicate[string]] { param($entry) $entry -match '(?i)WinGet' })
-    if ($shimIndex -lt 0 -or ($winGetIndex -ge 0 -and $shimIndex -gt $winGetIndex)) {
-        throw "Scoop shims do not precede WinGet in the $scope PATH."
+foreach ($dotfile in $winMoiManifest.Dotfiles) {
+    if (-not (Test-Path $dotfile.Source)) {
+        throw "Declared dotfile source '$($dotfile.SourceRelative)' does not exist."
     }
 }
 
+Assert-ScoopRoot $scoopRoot
+
+$shimPath = (Join-Path $scoopRoot "shims").TrimEnd('\', '/')
+$userPathEntries = @([Environment]::GetEnvironmentVariable("Path", "User") -split ";" | Where-Object { $_ })
+$shimIndex = [array]::FindIndex($userPathEntries, [Predicate[string]] { param($entry) $entry.TrimEnd('\', '/') -eq $shimPath })
+$winGetIndex = [array]::FindIndex($userPathEntries, [Predicate[string]] { param($entry) $entry -match '(?i)WinGet' })
+if ($shimIndex -lt 0 -or ($winGetIndex -ge 0 -and $shimIndex -gt $winGetIndex)) {
+    throw "Scoop shims do not precede WinGet in the User PATH."
+}
+
 if (-not $SkipLivecheck) {
-    $checkver = Join-Path $scoopRoot "Core/apps/scoop/current/bin/checkver.ps1"
+    $engineDir = Get-ScoopEngineDir $scoopRoot
+    $checkver = Join-Path $engineDir "apps/scoop/current/bin/checkver.ps1"
     if (-not (Test-Path $checkver)) {
         throw "Scoop checkver is not available at '$checkver'."
     }
@@ -65,4 +70,4 @@ if (-not $SkipLivecheck) {
     }
 }
 
-Write-Host "WinMoi validation passed."
+Write-Host "Validation passed."

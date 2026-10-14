@@ -1,0 +1,94 @@
+[env]
+SCOOP = "D:/Scoop"
+WINMOI_ROOT = "{% if config_root ~ '/scripts/bootstrap.ps1' is file %}{{ config_root }}{% else %}{{ exec(command='powershell.exe -NoProfile -Command Split-Path (Get-Item (Join-Path $env:USERPROFILE .config/mise/config.toml)).Target') | trim }}{% endif %}"
+
+[settings]
+dotfiles.default_mode = "symlink"
+
+# scoop_buckets = [
+#   "extras|https://github.com/ScoopInstaller/Extras.git",
+#   "games|https://github.com/Calinou/scoop-games.git",
+#   "versions|https://github.com/ScoopInstaller/Versions.git",
+#   "nerd-fonts|https://github.com/matthewjberger/scoop-nerd-fonts.git",
+#   "charm|https://github.com/charmbracelet/scoop-bucket.git",
+#   "winmoi|https://github.com/DaVinci42/WinMoi.git",
+# ]
+
+[bootstrap.packages]
+# core profile
+"scoop:main/7zip" = "latest"
+"scoop:main/act" = "latest"
+"scoop:main/gh" = "latest"
+"scoop:main/git" = "latest"
+"scoop:main/innounp" = "latest"
+"scoop:main/microsoft-coreutils" = "latest"
+"scoop:main/mise" = "latest"
+"scoop:main/nodejs" = "latest"
+"scoop:main/pwsh" = "latest"
+"scoop:main/rtk" = "latest"
+"scoop:main/starship" = "latest"
+"scoop:main/zoxide" = "latest"
+"scoop:extras/carapace-bin" = "latest"
+"scoop:extras/windows-terminal" = "latest"
+"scoop:extras/zed" = "latest"
+"scoop:nerd-fonts/JetBrainsMono-NF" = "latest"
+"scoop:charm/crush" = "latest"
+"scoop:winmoi/skills" = "latest"
+
+# full profile
+"scoop:extras/cheat-engine" = "latest"
+"scoop:extras/clash-party" = "latest"
+"scoop:extras/hibit-uninstaller" = "latest"
+"scoop:extras/localsend" = "latest"
+"scoop:extras/treesize-free" = "latest"
+"scoop:extras/unigetui" = "latest"
+"scoop:extras/zen-browser" = "latest"
+"scoop:games/steam" = "latest"
+"scoop:games/steam-achievement-manager" = "latest"
+"scoop:winmoi/adguard" = "latest"
+"scoop:winmoi/fluentcleaner" = "latest"
+"scoop:winmoi/nvidia-app" = "latest"
+
+[dotfiles]
+"~/.config/mise/config.toml" = "mise.toml"
+"~/.gitignore_global" = "dotfiles/user/gitignore_global"
+"~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1" = "dotfiles/user/powershell/Microsoft.PowerShell_profile.ps1"
+"~/.config/starship.toml" = "dotfiles/user/starship.toml"
+"~/.config/crush/crush.json" = "dotfiles/user/crush/crush.json"
+"D:/Scoop/persist/windows-terminal/settings/settings.json" = "dotfiles/user/windows-terminal/settings.json"
+"~/AppData/Roaming/Zed/settings.json" = "dotfiles/user/zed/settings.json"
+
+[tasks.bootstrap]
+description = "Bootstrap or restore declared Scoop packages, skills, and dotfile symlinks"
+dir = "{{env.WINMOI_ROOT}}"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1"
+
+[tasks.apply]
+description = "Restore declared Scoop packages, skills, and dotfile symlinks"
+dir = "{{env.WINMOI_ROOT}}"
+run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1"
+
+[tasks.up]
+description = "Update self-hosted manifests and installed Scoop packages"
+dir = "{{env.WINMOI_ROOT}}"
+run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1 -UpdatePackages"
+
+[tasks.plan]
+description = "Compare declared state in mise.toml with the current machine"
+dir = "{{env.WINMOI_ROOT}}"
+run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Plan"
+
+[tasks.check]
+description = "Fail if actual machine state differs from mise.toml"
+dir = "{{env.WINMOI_ROOT}}"
+run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Check"
+
+[tasks.clean]
+description = "Interactively remove undeclared Scoop packages and legacy state"
+dir = "{{env.WINMOI_ROOT}}"
+run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Clean"
+
+[tasks.validate]
+description = "Validate manifests, dotfile sources, Scoop root, PATH, and livechecks"
+dir = "{{env.WINMOI_ROOT}}"
+run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/validate.ps1"

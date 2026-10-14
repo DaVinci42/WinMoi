@@ -1,0 +1,66 @@
+name: Excavator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 3 * * 2,5'
+
+permissions:
+  contents: write
+
+jobs:
+  excavate:
+    name: Excavate
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup Scoop
+        shell: pwsh
+        run: |
+          if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            Invoke-RestMethod 'https://raw.githubusercontent.com/ScoopInstaller/Install/master/install.ps1' | Invoke-Expression
+            Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $env:USERPROFILE 'scoop\shims')
+          }
+      - name: Excavate
+        shell: pwsh
+        env:
+          SCOOP_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $scoopCmd = Get-Command scoop -ErrorAction Stop
+          $scoopBin = Resolve-Path (Join-Path (Split-Path $scoopCmd.Source) '..\apps\scoop\current\bin')
+          $ErrorActionPreference = 'Stop'
+          $checkver = Join-Path $scoopBin 'checkver.ps1'
+          $bucket = Join-Path $env:GITHUB_WORKSPACE 'bucket'
+          foreach ($manifest in Get-ChildItem $bucket -Filter '*.json' -File) {
+            $output = & $checkver -Dir $bucket -App $manifest.BaseName -Update -ThrowError *>&1
+            $output | ForEach-Object { Write-Host $_ }
+            $result = ($output | ForEach-Object { "$_" }) -join ''
+            $success = '(?m)^' + [regex]::Escape($manifest.BaseName) + ':\s+\d[\w.+-]*(?:$|\s*\(scoop version is|\s*\(up to date\))'
+            if ($result -notmatch $success) {
+              throw "Version check did not complete for $($manifest.BaseName). No updates will be published."
+            }
+            Get-Content -Raw $manifest.FullName | ConvertFrom-Json | Out-Null
+          }
+
+          $changed = @(git diff --name-only -- bucket/)
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to inspect manifest changes.' }
+          if ($changed.Count -eq 0) {
+            Write-Host 'All manifests are up to date. Nothing to commit or push.'
+          } elseif ($env:ACT -eq 'true') {
+            Write-Host "Local verification succeeded. Would commit: $($changed -join ', '). No commits or pushes performed."
+          } else {
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            foreach ($path in $changed) {
+              if ($path -notmatch '^bucket/[^/]+\.json$') { throw "Unexpected changed path: $path" }
+              $manifest = Get-Content -Raw $path | ConvertFrom-Json
+              $package = [IO.Path]::GetFileNameWithoutExtension($path)
+              git add -- $path
+              if ($LASTEXITCODE -ne 0) { throw "Failed to stage $path" }
+              git commit -m "${package}: Update to version $($manifest.version)"
+              if ($LASTEXITCODE -ne 0) { throw "Failed to commit $path" }
+            }
+            git push origin "HEAD:refs/heads/$env:GITHUB_REF_NAME"
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to push manifest updates.' }
+          }

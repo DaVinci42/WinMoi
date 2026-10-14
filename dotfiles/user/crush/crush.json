@@ -1,0 +1,91 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "command": "rtk hook claude",
+        "matcher": "^bash$",
+        "timeout": 30
+      }
+    ]
+  },
+  "models": {
+    "small": {
+      "max_tokens": 16384,
+      "model": "gpt-4.1",
+      "provider": "copilot"
+    }
+  },
+  "options": {
+    "attribution": {
+      "generated_with": true,
+      "trailer_style": "assisted-by"
+    },
+    "auto_lsp": false,
+    "data_directory": ".crush",
+    "debug": false,
+    "debug_lsp": false,
+    "disable_auto_summarize": false,
+    "disable_default_providers": false,
+    "disable_metrics": true,
+    "disable_provider_auto_update": false,
+    "initialize_as": "AGENTS.md",
+    "notifications": "auto",
+    "progress": true,
+    "request_timeout": 60,
+    "tui": {
+      "active_theme": "charmtone-panther",
+      "compact_mode": false,
+      "completions": {
+        "max_depth": 0,
+        "max_items": 1000
+      },
+      "exit_banner": "default",
+      "mouse": true,
+      "scrollbar": "default",
+      "transparent": false
+    }
+  },
+  "providers": {
+    "copilot": {
+      "disable": false,
+      "discover_models": true,
+      "models": [
+        {
+          "can_reason": true,
+          "context_window": 1050000,
+          "default_max_tokens": 128000,
+          "id": "gpt-6-astra",
+          "name": "GPT-6 Astra",
+          "reasoning_levels": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "supports_attachments": true
+        },
+        {
+          "can_reason": true,
+          "context_window": 1048576,
+          "default_max_tokens": 65536,
+          "id": "gemini-4-argon",
+          "name": "Gemini 4 Argon",
+          "reasoning_levels": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "supports_attachments": true
+        }
+      ],
+      "type": "openai"
+    }
+  },
+  "tools": {
+    "ls": {
+      "max_depth": 0,
+      "max_items": 1000
+    }
+  }
+}

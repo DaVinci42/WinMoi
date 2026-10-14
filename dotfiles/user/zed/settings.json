@@ -7,13 +7,13 @@
     "light": "Catppuccin Mocha",
     "dark": "Catppuccin Mocha"
   },
-  "buffer_font_family": "JetBrainsMono NFM",
+  "buffer_font_family": "JetBrainsMono NF",
   "terminal": {
-    "font_family": "JetBrainsMono NFM",
+    "font_family": "JetBrainsMono NF",
     "shell": {
       "with_arguments": {
-        "program": "D:\\Scoop\\shims\\nu.exe",
-        "args": []
+        "program": "pwsh.exe",
+        "args": ["-NoLogo"]
       }
     }
   }
