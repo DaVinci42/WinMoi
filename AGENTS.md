@@ -9,6 +9,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 - Install ALL packages via Scoop at user level (`SCOOP` in `mise.toml`, defaulting to `D:/Scoop`) so every package has a strict, deterministic location under `<scoop_root>/apps`.
 - Do not use `mise [tools]` for package installation.
 - Default shell is PowerShell (`pwsh`); ignore Nushell (`nu`).
+- Persist Scoop `ignore_running_processes=true` during bootstrap/apply/up so running apps do not block operations for this user, including direct Scoop commands. This also affects uninstall/reset; removal still requires confirmation.
 - Drive bootstrap and ongoing maintenance directly via `mise` commands (`mise bootstrap --only task`, `mise run plan|apply|up|check|clean|validate`) without a custom `winmoi` wrapper.
 - Always ask for confirmation before uninstalling anything.
 

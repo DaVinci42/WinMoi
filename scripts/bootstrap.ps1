@@ -353,6 +353,9 @@ if (-not $SkipPackages) {
     if ($PSCmdlet.ShouldProcess((Join-Path $manifest.ScoopRoot "shims"), "Prepend Scoop shims to user PATH")) {
         Set-ScoopPathPrecedence $manifest
     }
+    if ($PSCmdlet.ShouldProcess($manifest.ScoopRoot, "Persist Scoop ignore_running_processes=true for this user")) {
+        Invoke-Scoop $scoop @("config", "ignore_running_processes", "true")
+    }
     Add-WinMoiBuckets $manifest $scoop
     if ($UpdatePackages) {
         & (Join-Path $PSScriptRoot "update-selfhost-packages.ps1") -WhatIf:$WhatIfPreference

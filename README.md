@@ -58,6 +58,8 @@ mise run plan -- -Core
 
 Zed's built-in updater should remain disabled. NVIDIA App is vendor-installed under `C:/Program Files`, while Scoop controls its package lifecycle.
 
+Bootstrap, apply, and up persist Scoop `ignore_running_processes=true` for the current user. Direct `scoop update` commands also continue when an app is running; this is not deferred activation and does not bypass file locks. The setting also affects uninstall/reset, while WinMoi cleanup still asks for confirmation.
+
 ## Automated Bucket Updates
 
 The Excavator workflow runs Tuesdays and Fridays at 03:37 UTC. You can also select **Actions > Excavator > Run workflow** on GitHub, or run `gh workflow run excavator.yml` after the workflow is available on the default branch.
