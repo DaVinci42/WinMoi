@@ -1,5 +1,6 @@
 [env]
 SCOOP = "D:/Scoop"
+RTK_SUPPRESS_HOOK_WARNING = "1"
 WINMOI_ROOT = "{% if config_root ~ '/scripts/bootstrap.ps1' is file %}{{ config_root }}{% else %}{{ exec(command='powershell.exe -NoProfile -Command Split-Path (Get-Item (Join-Path $env:USERPROFILE .config/mise/config.toml)).Target') | trim }}{% endif %}"
 
 [settings]
