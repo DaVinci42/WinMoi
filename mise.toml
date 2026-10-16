@@ -35,6 +35,7 @@ dotfiles.default_mode = "symlink"
 "scoop:extras/zed" = "latest"
 "scoop:nerd-fonts/JetBrainsMono-NF" = "latest"
 "scoop:charm/crush" = "latest"
+"scoop:winmoi/figtree" = "latest"
 "scoop:winmoi/skills" = "latest"
 
 # full profile

@@ -25,7 +25,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 - Prefer official Scoop buckets. Charmbracelet's official bucket provides Crush.
 - Package-specific custom manifests belong in this repository's `bucket` directory. The repository is registered as the `winmoi` Scoop bucket, and packages are declared as `scoop:winmoi/<package>`.
 - Every self-hosted manifest must define Scoop `checkver` and `autoupdate` metadata so versions, URLs, and hashes can be refreshed consistently.
-- FluentCleaner, AdGuard, NVIDIA App, SFW, and the Skills CLI (`winmoi/skills`) use the common self-hosted package mechanism.
+- FluentCleaner, AdGuard, NVIDIA App, SFW, Figtree, and the Skills CLI (`winmoi/skills`) use the common self-hosted package mechanism.
 - The Skills CLI is installed as `scoop:winmoi/skills` and manages the repository-backed global catalog under `.agents`.
 
 ## Configuration Management
@@ -59,7 +59,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 ## Current Layout
 
 - `mise.toml`: Scoop root (`[env]`), Scoop packages (`[bootstrap.packages]`), symlinked dotfiles (`[dotfiles]`), and tasks (`[tasks.*]`).
-- `bucket`: self-hosted Scoop manifests (`adguard.json`, `fluentcleaner.json`, `nvidia-app.json`, `sfw.json`, `skills.json`) with livecheck and autoupdate metadata.
+- `bucket`: self-hosted Scoop manifests (`adguard.json`, `figtree.json`, `fluentcleaner.json`, `nvidia-app.json`, `sfw.json`, `skills.json`) with livecheck and autoupdate metadata.
 - `scripts/update-selfhost-packages.ps1`: refreshes every self-hosted manifest through Scoop checkver.
 - `scripts/validate.ps1`: validates manifests, dotfile sources, installed versions, Scoop root, livechecks, and PATH precedence.
 - `scripts/state.ps1`: plans, checks, and interactively cleans differences between declared and actual state.

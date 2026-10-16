@@ -1,14 +1,21 @@
 {
+  "icon_theme": "Catppuccin Mocha",
+  "project_panel": {
+    "dock": "left"
+  },
+  "markdown_preview": {
+    "font_family": "Figtree"
+  },
+  "ui_font_size": 17.0,
+  "ui_font_family": "Figtree",
+  "auto_update": false,
   "auto_install_extensions": {
     "catppuccin": true
   },
-  "theme": {
-    "mode": "dark",
-    "light": "Catppuccin Mocha",
-    "dark": "Catppuccin Mocha"
-  },
+  "theme": "Catppuccin Mocha",
   "buffer_font_family": "JetBrainsMono NF",
   "terminal": {
+    "dock": "right",
     "font_family": "JetBrainsMono NF",
     "shell": {
       "with_arguments": {
