@@ -39,7 +39,6 @@ dotfiles.default_mode = "symlink"
 
 # full profile
 "scoop:extras/cheat-engine" = "latest"
-"scoop:extras/clash-party" = "latest"
 "scoop:extras/hibit-uninstaller" = "latest"
 "scoop:extras/localsend" = "latest"
 "scoop:extras/treesize-free" = "latest"
@@ -50,6 +49,7 @@ dotfiles.default_mode = "symlink"
 "scoop:winmoi/adguard" = "latest"
 "scoop:winmoi/fluentcleaner" = "latest"
 "scoop:winmoi/nvidia-app" = "latest"
+"scoop:winmoi/sfw" = "latest"
 
 [dotfiles]
 "~/.config/mise/config.toml" = "mise.toml"

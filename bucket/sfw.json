@@ -1,0 +1,47 @@
+{
+    "version": "1.14.3",
+    "description": "Windows client for sing-box, the universal proxy platform.",
+    "homepage": "https://sing-box.sagernet.org/",
+    "license": "GPL-3.0-or-later",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x64.exe#/setup.exe",
+            "hash": "ba65f354f9096ff31b612ce6784abce417ab3628faa06e8b47c0203cc045c731"
+        },
+        "32bit": {
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x86.exe#/setup.exe",
+            "hash": "948a1ed4e6e2e0bb2fed5f2b5f03bfb6790f69ef7530e00f2330239e6713c478"
+        },
+        "arm64": {
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-arm64.exe#/setup.exe",
+            "hash": "fa9cdd25a5474f9caf394d4ab25068d9c7a28abcc08aba801af3321106dadfc9"
+        }
+    },
+    "installer": {
+        "script": "Invoke-ExternalCommand \"$dir\\setup.exe\" -ArgumentList '/S' -RunAs | Out-Null"
+    },
+    "uninstaller": {
+        "script": [
+            "$uninstall = \"$env:ProgramFiles\\sing-box\\Uninstall sing-box.exe\"",
+            "if (Test-Path -LiteralPath $uninstall) {",
+            "    Invoke-ExternalCommand $uninstall -ArgumentList @('/allusers', '/S') -RunAs | Out-Null",
+            "}"
+        ]
+    },
+    "checkver": {
+        "github": "https://github.com/SagerNet/sing-box"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-x64.exe#/setup.exe"
+            },
+            "32bit": {
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-x86.exe#/setup.exe"
+            },
+            "arm64": {
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-arm64.exe#/setup.exe"
+            }
+        }
+    }
+}
