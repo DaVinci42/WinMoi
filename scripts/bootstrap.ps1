@@ -124,28 +124,6 @@ function Add-WinMoiBuckets {
     }
 }
 
-function Get-ScoopPackage {
-    param(
-        [pscustomobject]$Manifest,
-        [string]$Package
-    )
-
-    $parts = $Package.Split('/', 2)
-    $name = $parts[-1]
-    $selfHosted = $parts.Count -eq 2 -and $parts[0] -eq "winmoi"
-    $engineDir = Get-ScoopEngineDir $Manifest.ScoopRoot
-    $availableManifest = if ($selfHosted) {
-        Join-Path $engineDir "buckets/winmoi/bucket/$name.json"
-    }
-
-    [pscustomobject]@{
-        Name = $name
-        Source = $Package
-        SelfHosted = $selfHosted
-        AvailableManifest = $availableManifest
-    }
-}
-
 function Install-WinMoiPackages {
     param(
         [pscustomobject]$Manifest,
@@ -161,6 +139,13 @@ function Install-WinMoiPackages {
                 $changes = @(git -C $bucketPath status --porcelain)
                 if ($LASTEXITCODE -ne 0 -or $changes.Count -gt 0) {
                     throw "Bucket '$($bucket.Name)' has local changes or cannot be inspected. Refusing to overwrite it."
+                }
+                if ($bucket.Name -eq "winmoi") {
+                    git -C $bucketPath pull --ff-only $ProjectRoot HEAD
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Bucket 'winmoi' cannot fast-forward to local repository HEAD. Resolve its history manually."
+                    }
+                    continue
                 }
                 git -C $bucketPath fetch origin
                 if ($LASTEXITCODE -ne 0) {
@@ -180,46 +165,30 @@ function Install-WinMoiPackages {
     }
 
     foreach ($package in $Manifest.Packages) {
-        $resolvedPackage = Get-ScoopPackage $Manifest $package
-        $current = Join-Path $Manifest.ScoopRoot "apps/$($resolvedPackage.Name)/current"
+        $name = $package.Split('/', 2)[-1]
+        $current = Join-Path $Manifest.ScoopRoot "apps/$name/current"
 
         if (-not (Test-Path $current)) {
             if ($PSCmdlet.ShouldProcess($package, "Install in $($Manifest.ScoopRoot)")) {
-                Invoke-Scoop $Scoop @("install", $resolvedPackage.Source)
+                Invoke-Scoop $Scoop @("install", $package)
             }
         }
-        elseif ($UpdatePackages -and $resolvedPackage.SelfHosted) {
-            $availableManifest = $resolvedPackage.AvailableManifest
-            if (-not (Test-Path $availableManifest) -and $WhatIfPreference) {
-                $availableManifest = Join-Path $ProjectRoot "bucket/$($resolvedPackage.Name).json"
-            }
-            if (-not (Test-Path $availableManifest)) {
-                throw "The registered winmoi bucket does not contain '$($resolvedPackage.Name)'."
-            }
-            $installedManifest = Join-Path $current "scoop-manifest.json"
-            if (-not (Test-Path $installedManifest)) {
-                $installedManifest = Join-Path $current "manifest.json"
-            }
-            $installedVersion = if (Test-Path $installedManifest) {
-                (Get-Content -Raw $installedManifest | ConvertFrom-Json).version
-            }
-            $availableVersion = (Get-Content -Raw $availableManifest | ConvertFrom-Json).version
-            if ($installedVersion -ne $availableVersion -and $PSCmdlet.ShouldProcess($package, "Update in $($Manifest.ScoopRoot)")) {
-                Invoke-Scoop $Scoop @("update", $resolvedPackage.Source)
-            }
-            else {
-                Write-Host "Self-hosted package '$package' is current at version '$installedVersion'."
-            }
-        }
-        elseif ($UpdatePackages -and $PSCmdlet.ShouldProcess($package, "Update in $($Manifest.ScoopRoot)")) {
-            Invoke-Scoop $Scoop @("update", $resolvedPackage.Source)
-        }
-        else {
+        elseif (-not $UpdatePackages) {
             Write-Host "Package '$package' is already installed in '$current'."
         }
 
         if (-not $WhatIfPreference -and (Test-Path $Scoop) -and -not (Test-Path $current)) {
             throw "Scoop did not create the expected package location '$current'."
+        }
+    }
+
+    if ($UpdatePackages) {
+        if ($PSCmdlet.ShouldProcess($Manifest.ScoopRoot, "Update all installed Scoop packages (scoop update *)")) {
+            Invoke-Scoop $Scoop @("update", "*")
+        }
+        if ($PSCmdlet.ShouldProcess($Manifest.ScoopRoot, "Clean up old Scoop package versions (scoop cleanup *)")) {
+            try { & $Scoop cleanup * } catch { Write-Host "`nDeferred cleanup for in-use old version(s): $($_.Exception.Message)" }
+            $global:LASTEXITCODE = 0
         }
     }
 }
@@ -349,6 +318,9 @@ function Apply-WinMoiDotfiles {
 }
 
 $manifest = Read-WinMoiManifest $ManifestPath -Core:$Core
+if ($UpdatePackages -and -not $WhatIfPreference) {
+    Import-Module Microsoft.PowerShell.Archive, Microsoft.PowerShell.Management, Microsoft.PowerShell.Security, Microsoft.PowerShell.Utility -ErrorAction SilentlyContinue
+}
 
 if (-not $SkipPackages) {
     $scoop = Resolve-Scoop $manifest

@@ -39,7 +39,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 
 - `mise run plan` compares declared Scoop packages and dotfile symlinks with the current machine without changing it.
 - Bootstrap, apply, up, plan, check, and clean accept `-Profile core` or `-Profile full` (default). `-Core` remains shorthand for Core. Use `mise run bootstrap -- -Profile core` for essentials, including Zed, Crush, and rtk.
-- `mise run up` updates self-hosted manifests and installed Scoop packages.
+- `mise run up` updates and commits self-hosted manifests (`<package>: Update to version <version>`), fast-forwards Scoop buckets (syncing local `winmoi` commits), updates all installed Scoop packages (`scoop update *`), and removes old package versions (`scoop cleanup *`).
 - `mise run check` fails when actual state differs from the declaration.
 - `mise run clean` offers undeclared Scoop packages and known legacy state for removal, confirming every removal.
 - `mise run validate` validates self-hosted manifests, dotfile sources, Scoop root, PATH precedence, and livechecks.
@@ -51,7 +51,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 3. It verifies Scoop's configured root and prepends `<scoop_root>/shims` to User `PATH` before installing or updating packages.
 4. It registers declared remote buckets, including this repository as `winmoi`.
 5. It installs missing Scoop packages (including `main/mise` and `main/pwsh`) and verifies each stable `current` path.
-6. With `-UpdatePackages` (`mise run up`), it refreshes local self-hosted manifests for review, updates remote buckets, and updates installed Scoop packages.
+6. With `-UpdatePackages` (`mise run up`), it refreshes and commits local self-hosted manifests, fast-forwards remote buckets (and syncs the registered `winmoi` bucket from the local repository HEAD), installs any missing declared packages, runs `scoop update *`, and runs `scoop cleanup *`.
 7. It links only `.agents/skills` and `.agents/.skill-lock.json` into `~/.agents` so unrelated agent state remains local.
 8. It ensures all declared `[dotfiles]` targets are file-level `SymbolicLink`s pointing to the repository checkout (syncing back any atomically saved file modifications first).
 9. `-Core`, `-WhatIf`, `-SkipPackages`, and `-SkipUserConfig` support minimal, preview, and partial restores.
@@ -60,7 +60,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 
 - `mise.toml`: Scoop root (`[env]`), Scoop packages (`[bootstrap.packages]`), symlinked dotfiles (`[dotfiles]`), and tasks (`[tasks.*]`).
 - `bucket`: self-hosted Scoop manifests (`adguard.json`, `figtree.json`, `fluentcleaner.json`, `nvidia-app.json`, `sfw.json`, `skills.json`) with livecheck and autoupdate metadata.
-- `scripts/update-selfhost-packages.ps1`: refreshes every self-hosted manifest through Scoop checkver.
+- `scripts/update-selfhost-packages.ps1`: refreshes every self-hosted manifest through Scoop checkver and commits each updated manifest (`<package>: Update to version <version>`).
 - `scripts/validate.ps1`: validates manifests, dotfile sources, installed versions, Scoop root, livechecks, and PATH precedence.
 - `scripts/state.ps1`: plans, checks, and interactively cleans differences between declared and actual state.
 - `.agents`: versioned global skills and Skills CLI lock state.

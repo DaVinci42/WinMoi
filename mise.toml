@@ -72,7 +72,7 @@ dir = "{{env.WINMOI_ROOT}}"
 run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1"
 
 [tasks.up]
-description = "Update self-hosted manifests and installed Scoop packages"
+description = "Update and commit self-hosted manifests, update all Scoop packages, and clean up old versions"
 dir = "{{env.WINMOI_ROOT}}"
 run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1 -UpdatePackages"
 

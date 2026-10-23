@@ -34,7 +34,7 @@ mise run validate
 
 - `mise run plan`: show declared vs. actual differences (Scoop packages, dotfile symlinks, legacy PATH).
 - `mise run apply`: install missing packages for the selected profile and restore dotfile symlinks; existing packages are not upgraded.
-- `mise run up`: update self-hosted manifests and installed Scoop packages.
+- `mise run up`: check and commit self-hosted manifest updates (`<package>: Update to version <version>`), fast-forward Scoop buckets (including local `winmoi` commits), run `scoop update *`, and run `scoop cleanup *`.
 - `mise run check`: fail when the machine has drifted from `mise.toml`.
 - `mise run clean`: confirm each removal interactively.
 - `mise run validate`: verify manifests, dotfile sources, Scoop root, PATH precedence, and livechecks.
