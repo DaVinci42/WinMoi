@@ -1,3 +1,8 @@
+$psHomeModules = Join-Path $PSHOME "Modules"
+$env:PSModulePath = (@($psHomeModules) + @($env:PSModulePath -split ";" | Where-Object {
+    $_ -and $_ -notmatch '(?i)(\\|/)PowerShell(\\|/)Modules$' -and $_ -notmatch '(?i)(\\|/)apps(\\|/)pwsh(\\|/)'
+}) | Select-Object -Unique) -join ";"
+
 function Expand-WinMoiPath {
     param(
         [string]$Path,

@@ -22,7 +22,9 @@ $scoopRoot = $manifest.ScoopRoot
 $declaredPackages = @($manifest.Packages | ForEach-Object { $_.Split('/', 2)[-1] })
 $appsPath = Join-Path $scoopRoot "apps"
 $installedPackages = if (Test-Path $appsPath) {
-    @(Get-ChildItem $appsPath -Directory | Where-Object { $_.Name -ne "scoop" } | ForEach-Object { $_.Name })
+    @(Get-ChildItem $appsPath -Directory |
+        Where-Object { $_.Name -ne "scoop" -and (Test-Path (Join-Path $_.FullName "current")) } |
+        ForEach-Object { $_.Name })
 }
 else {
     @()
@@ -75,7 +77,7 @@ foreach ($scope in @("User")) {
 
 $residualFiles = @(
     (Join-Path $HOME ".config/windows-terminal")
-    (Join-Path $HOME "AppData/Roaming/nushell")
+    (Join-Path $HOME "Documents/PowerShell/Microsoft.PowerShell_profile.ps1")
 ) | Where-Object { Test-Path $_ }
 
 $driftCount = $missingPackages.Count + $extraPackages.Count + $configDrift.Count + $legacyPathEntries.Count + $residualFiles.Count

@@ -18,10 +18,7 @@
     "dock": "right",
     "font_family": "JetBrainsMono NF",
     "shell": {
-      "with_arguments": {
-        "program": "pwsh.exe",
-        "args": ["-NoLogo"]
-      }
+      "program": "D:\\Scoop\\apps\\nu\\current\\nu.exe"
     }
   }
 }

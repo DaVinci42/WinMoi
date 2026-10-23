@@ -26,7 +26,7 @@ dotfiles.default_mode = "symlink"
 "scoop:main/microsoft-coreutils" = "latest"
 "scoop:main/mise" = "latest"
 "scoop:main/nodejs" = "latest"
-"scoop:main/pwsh" = "latest"
+"scoop:main/nu" = "latest"
 "scoop:main/rtk" = "latest"
 "scoop:main/starship" = "latest"
 "scoop:main/zoxide" = "latest"
@@ -55,7 +55,7 @@ dotfiles.default_mode = "symlink"
 [dotfiles]
 "~/.config/mise/config.toml" = "mise.toml"
 "~/.gitignore_global" = "dotfiles/user/gitignore_global"
-"~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1" = "dotfiles/user/powershell/Microsoft.PowerShell_profile.ps1"
+"~/AppData/Roaming/nushell/config.nu" = "dotfiles/user/nushell/config.nu"
 "~/.config/starship.toml" = "dotfiles/user/starship.toml"
 "~/.config/crush/crush.json" = "dotfiles/user/crush/crush.json"
 "D:/Scoop/persist/windows-terminal/settings/settings.json" = "dotfiles/user/windows-terminal/settings.json"
@@ -69,29 +69,29 @@ run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/b
 [tasks.apply]
 description = "Restore declared Scoop packages, skills, and dotfile symlinks"
 dir = "{{env.WINMOI_ROOT}}"
-run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1"
 
 [tasks.up]
 description = "Update and commit self-hosted manifests, update all Scoop packages, and clean up old versions"
 dir = "{{env.WINMOI_ROOT}}"
-run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1 -UpdatePackages"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1 -UpdatePackages"
 
 [tasks.plan]
 description = "Compare declared state in mise.toml with the current machine"
 dir = "{{env.WINMOI_ROOT}}"
-run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Plan"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Plan"
 
 [tasks.check]
 description = "Fail if actual machine state differs from mise.toml"
 dir = "{{env.WINMOI_ROOT}}"
-run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Check"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Check"
 
 [tasks.clean]
 description = "Interactively remove undeclared Scoop packages and legacy state"
 dir = "{{env.WINMOI_ROOT}}"
-run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Clean"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/state.ps1 -Mode Clean"
 
 [tasks.validate]
 description = "Validate manifests, dotfile sources, Scoop root, PATH, and livechecks"
 dir = "{{env.WINMOI_ROOT}}"
-run = "pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/validate.ps1"
+run = "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File scripts/validate.ps1"

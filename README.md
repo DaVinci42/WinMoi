@@ -1,6 +1,6 @@
 # WinMoi
 
-Restore and maintain a lean Windows machine from a single `mise.toml` declaration: user-level Scoop packages, PowerShell & app dotfiles, and global agent skills.
+Restore and maintain a lean Windows machine from a single `mise.toml` declaration: user-level Scoop packages, Nushell & app dotfiles, and global agent skills.
 
 ## Quick Bootstrap (New Machine)
 
@@ -74,7 +74,7 @@ mise run apply -- -Profile full
 ## Declaration (`mise.toml`)
 
 - `[env]`: user-configured `SCOOP` root (default `D:/Scoop`). All packages are strictly installed by Scoop under `<SCOOP>/apps`.
-- `[bootstrap.packages]`: user-level Scoop packages (`pwsh`, `mise`, `git`, `gh`, `nodejs`, `starship`, `zoxide`, `windows-terminal`, `crush`, `winmoi/skills`, fonts, and Full desktop apps).
+- `[bootstrap.packages]`: user-level Scoop packages (`nu`, `mise`, `git`, `gh`, `nodejs`, `starship`, `zoxide`, `windows-terminal`, `crush`, `winmoi/skills`, fonts, and Full desktop apps).
 - `[dotfiles]`: explicit file-level `SymbolicLink` mappings pointing directly to `dotfiles/user` and `dotfiles/full`. Editing any target config updates the repo immediately; apps that overwrite files on save (such as Windows Terminal) are synced back when you explicitly run `mise run apply`, provided a prior apply recorded their baseline. First adoption preserves the old target as a `.winmoi-backup-*` file and keeps the repository authoritative. Concurrent source and target edits stop with a conflict. Link creation is tested before replacing a target; metadata and source backups stay under `%LOCALAPPDATA%/WinMoi/dotfiles`.
 
 Prefer `mise run up` over built-in application updaters. Some packages use vendor installers with paths outside the Scoop root; Scoop still manages their package lifecycle.

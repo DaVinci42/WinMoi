@@ -8,7 +8,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 
 - Install ALL packages via Scoop at user level (`SCOOP` in `mise.toml`, defaulting to `D:/Scoop`) so every package has a strict, deterministic location under `<scoop_root>/apps`.
 - Do not use `mise [tools]` for package installation.
-- Default shell is PowerShell (`pwsh`); ignore Nushell (`nu`).
+- Default interactive shell is Nushell (`nu`); maintenance scripts run under built-in Windows PowerShell (`powershell.exe`) so Scoop updates never conflict with the running shell engine.
 - Persist Scoop `ignore_running_processes=true` during bootstrap/apply/up so running apps do not block operations for this user, including direct Scoop commands. This also affects uninstall/reset; removal still requires confirmation.
 - Drive bootstrap and ongoing maintenance directly via `mise` commands (`mise bootstrap --only task`, `mise run plan|apply|up|check|clean|validate`) without a custom `winmoi` wrapper.
 - Always ask for confirmation before uninstalling anything.
@@ -32,7 +32,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 
 - Users explicitly add every managed configuration file to `[dotfiles]` in `mise.toml`.
 - Core user configuration belongs in `dotfiles/user`; Full-only application configuration belongs in `dotfiles/full`.
-- Every `[dotfiles]` entry is linked as a real file `SymbolicLink` pointing directly to the repository checkout (`dotfiles.default_mode = "symlink"`), including `mise.toml` (`~/.config/mise/config.toml`), PowerShell profile, Starship, Crush (`crush.json`), Windows Terminal, and Zed.
+- Every `[dotfiles]` entry is linked as a real file `SymbolicLink` pointing directly to the repository checkout (`dotfiles.default_mode = "symlink"`), including `mise.toml` (`~/.config/mise/config.toml`), Nushell (`config.nu`), Starship, Crush (`crush.json`), Windows Terminal, and Zed.
 - Editing a target file (or an application saving settings in-place) directly updates the working tree in the repository. If an application performs atomic rename-on-save and replaces a symlink with a regular file, `mise run apply` uses local baseline metadata to sync edits back before re-linking. First adoption backs up the existing target without overwriting repository content. Conflicting edits stop. Create a temporary link before moving the old target; keep backups under the target directory and `%LOCALAPPDATA%/WinMoi/dotfiles`.
 
 ## State & Maintenance Workflow
@@ -46,14 +46,14 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 
 ## Bootstrap Workflow
 
-1. `mise run bootstrap -- -Profile core|full` reads and validates `mise.toml` using Windows PowerShell, which is available before pwsh is installed. Use native `mise bootstrap --only task` (also with `--from`) to run Full through the same script. Do not use native package/dotfile phases; they bypass our profile and safety logic.
+1. `mise run bootstrap -- -Profile core|full` reads and validates `mise.toml` using built-in Windows PowerShell (`powershell.exe`). Use native `mise bootstrap --only task` (also with `--from`) to run Full through the same script. Do not use native package/dotfile phases; they bypass our profile and safety logic.
 2. It installs user-level Scoop in `<scoop_root>` if not already installed.
 3. It verifies Scoop's configured root and prepends `<scoop_root>/shims` to User `PATH` before installing or updating packages.
 4. It registers declared remote buckets, including this repository as `winmoi`.
-5. It installs missing Scoop packages (including `main/mise` and `main/pwsh`) and verifies each stable `current` path.
+5. It installs missing Scoop packages (including `main/mise` and `main/nu`) and verifies each stable `current` path.
 6. With `-UpdatePackages` (`mise run up`), it refreshes and commits local self-hosted manifests, fast-forwards remote buckets (and syncs the registered `winmoi` bucket from the local repository HEAD), installs any missing declared packages, runs `scoop update *`, and runs `scoop cleanup *`.
 7. It links only `.agents/skills` and `.agents/.skill-lock.json` into `~/.agents` so unrelated agent state remains local.
-8. It ensures all declared `[dotfiles]` targets are file-level `SymbolicLink`s pointing to the repository checkout (syncing back any atomically saved file modifications first).
+8. It generates Nushell integration scripts (`carapace.nu`, `starship.nu`, `zoxide.nu`) and ensures all declared `[dotfiles]` targets are file-level `SymbolicLink`s pointing to the repository checkout (syncing back any atomically saved file modifications first).
 9. `-Core`, `-WhatIf`, `-SkipPackages`, and `-SkipUserConfig` support minimal, preview, and partial restores.
 
 ## Current Layout
@@ -64,7 +64,7 @@ WinMoi restores and maintains a lean Windows machine from a single `mise.toml` d
 - `scripts/validate.ps1`: validates manifests, dotfile sources, installed versions, Scoop root, livechecks, and PATH precedence.
 - `scripts/state.ps1`: plans, checks, and interactively cleans differences between declared and actual state.
 - `.agents`: versioned global skills and Skills CLI lock state.
-- `dotfiles/user`: User-level dotfiles (`powershell`, `starship.toml`, `crush`, `windows-terminal`, `zed`, `gitignore_global`). Zed configuration and the Zed package are included in Core.
+- `dotfiles/user`: User-level dotfiles (`nushell`, `starship.toml`, `crush`, `windows-terminal`, `zed`, `gitignore_global`). Zed configuration and the Zed package are included in Core.
 - `dotfiles/full`: Reserved for Full-only user-level dotfiles; currently no entries.
 - `scripts/bootstrap.ps1`: Scoop installation, user-level package management, skills links, and dotfile symlink implementation.
 

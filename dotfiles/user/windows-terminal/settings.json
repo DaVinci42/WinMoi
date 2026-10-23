@@ -31,7 +31,7 @@
     ],
     "copyFormatting": "none",
     "copyOnSelect": true,
-    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "defaultProfile": "{b6f07b8d-6f75-48a5-8f57-2f441d71aeb7}",
     "keybindings":
     [
         {
@@ -73,10 +73,10 @@
         "list":
         [
             {
-                "commandline": "D:\\Scoop\\apps\\pwsh\\current\\pwsh.exe -NoLogo",
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "commandline": "\"%SCOOP%\\apps\\nu\\current\\nu.exe\"",
+                "guid": "{b6f07b8d-6f75-48a5-8f57-2f441d71aeb7}",
                 "hidden": false,
-                "name": "PowerShell"
+                "name": "Nushell"
             },
             {
                 "commandline": "%SystemRoot%\\System32\\cmd.exe",

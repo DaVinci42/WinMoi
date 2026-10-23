@@ -193,6 +193,20 @@ function Install-WinMoiPackages {
     }
 }
 
+function New-WinMoiLink {
+    param(
+        [string]$Path,
+        [string]$Target,
+        [string]$Type = "SymbolicLink"
+    )
+
+    $flag = if ($Type -eq "Junction") { "/j" } else { "" }
+    $output = cmd /c mklink $flag "`"$Path`"" "`"$Target`"" 2>&1
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $Path)) {
+        throw "Creating $Type '$Path' -> '$Target' failed ($($output -join ' ')). Enable Windows Developer Mode or run in an elevated session."
+    }
+}
+
 function Link-WinMoiSkills {
     $agentsDirectory = Join-Path $HOME ".agents"
     $links = @(
@@ -225,12 +239,31 @@ function Link-WinMoiSkills {
         }
 
         if ($PSCmdlet.ShouldProcess($link.Target, "Create $($link.Type) to $($link.Source)")) {
-            try {
-                New-Item -ItemType $link.Type -Path $link.Target -Target $link.Source | Out-Null
+            New-WinMoiLink -Path $link.Target -Target $link.Source -Type $link.Type
+        }
+    }
+}
+
+function Initialize-NushellIntegrations {
+    param([pscustomobject]$Manifest)
+
+    $configDirectory = Join-Path $HOME "AppData/Roaming/nushell"
+    if (-not (Test-Path $configDirectory) -and $PSCmdlet.ShouldProcess($configDirectory, "Create Nushell configuration directory")) {
+        New-Item -ItemType Directory -Path $configDirectory -Force | Out-Null
+    }
+    foreach ($integration in @(
+        @("carapace-bin", "carapace", "_carapace", "nushell"),
+        @("starship", "starship", "init", "nu"),
+        @("zoxide", "zoxide", "init", "nushell")
+    )) {
+        $executable = Join-Path $Manifest.ScoopRoot "apps/$($integration[0])/current/$($integration[1]).exe"
+        $target = Join-Path $configDirectory "$($integration[1]).nu"
+        if ($PSCmdlet.ShouldProcess($target, "Generate Nushell integration with $executable")) {
+            $content = & $executable $integration[2] $integration[3]
+            if ($LASTEXITCODE -ne 0) {
+                throw "Failed to generate Nushell integration '$target'."
             }
-            catch [System.UnauthorizedAccessException] {
-                throw "Creating '$($link.Target)' requires an elevated Windows session or Windows Developer Mode."
-            }
+            [IO.File]::WriteAllText($target, ($content -join [Environment]::NewLine), [Text.UTF8Encoding]::new($false))
         }
     }
 }
@@ -288,7 +321,7 @@ function Apply-WinMoiDotfiles {
             $backup = "$($dotfile.Target).winmoi-backup-$([guid]::NewGuid().ToString('N'))"
             $moved = $false
             try {
-                New-Item -ItemType SymbolicLink -Path $temporary -Target $dotfile.Source -ErrorAction Stop | Out-Null
+                New-WinMoiLink -Path $temporary -Target $dotfile.Source -Type "SymbolicLink"
                 if ($syncBack) {
                     Copy-Item -LiteralPath $dotfile.Source -Destination (Join-Path $stateDirectory "$key-$([guid]::NewGuid().ToString('N')).backup")
                     Copy-Item -LiteralPath $dotfile.Target -Destination $dotfile.Source -Force
@@ -318,9 +351,6 @@ function Apply-WinMoiDotfiles {
 }
 
 $manifest = Read-WinMoiManifest $ManifestPath -Core:$Core
-if ($UpdatePackages -and -not $WhatIfPreference) {
-    Import-Module Microsoft.PowerShell.Archive, Microsoft.PowerShell.Management, Microsoft.PowerShell.Security, Microsoft.PowerShell.Utility -ErrorAction SilentlyContinue
-}
 
 if (-not $SkipPackages) {
     $scoop = Resolve-Scoop $manifest
@@ -338,21 +368,9 @@ if (-not $SkipPackages) {
     Install-WinMoiPackages $manifest $scoop
 }
 
-if ($PSVersionTable.PSVersion.Major -lt 7 -and -not $WhatIfPreference) {
-    $pwsh = Join-Path $manifest.ScoopRoot "apps/pwsh/current/pwsh.exe"
-    if (-not (Test-Path -LiteralPath $pwsh)) {
-        throw "PowerShell 7 is required for user-level symlinks. Install the declared pwsh package first."
-    }
-    $selectedProfile = if ($Core) { "core" } else { "full" }
-    $parameters = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $PSCommandPath, "-SkipPackages", "-Profile", $selectedProfile)
-    if ($SkipUserConfig) { $parameters += "-SkipUserConfig" }
-    & $pwsh @parameters
-    if ($LASTEXITCODE -ne 0) { throw "PowerShell 7 configuration phase failed." }
-    return
-}
-
 Link-WinMoiSkills
 
 if (-not $SkipUserConfig) {
+    Initialize-NushellIntegrations $manifest
     Apply-WinMoiDotfiles $manifest
 }
