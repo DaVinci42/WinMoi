@@ -1,20 +1,20 @@
 {
-    "version": "1.14.3",
+    "version": "1.14.4",
     "description": "Windows client for sing-box, the universal proxy platform.",
     "homepage": "https://sing-box.sagernet.org/",
     "license": "GPL-3.0-or-later",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x64.exe#/setup.exe",
-            "hash": "ba65f354f9096ff31b612ce6784abce417ab3628faa06e8b47c0203cc045c731"
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.4/SFW-1.14.4-x64.exe#/setup.exe",
+            "hash": "9720433083bb00cacbc439cad79b89d337814fe8af31a8ff6f8dc5b807782446"
         },
         "32bit": {
-            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x86.exe#/setup.exe",
-            "hash": "948a1ed4e6e2e0bb2fed5f2b5f03bfb6790f69ef7530e00f2330239e6713c478"
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.4/SFW-1.14.4-x86.exe#/setup.exe",
+            "hash": "601f544331c7769cbb8bd77cac32e42f35ceff3cd201a0ae97387555607984cc"
         },
         "arm64": {
-            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-arm64.exe#/setup.exe",
-            "hash": "fa9cdd25a5474f9caf394d4ab25068d9c7a28abcc08aba801af3321106dadfc9"
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.4/SFW-1.14.4-arm64.exe#/setup.exe",
+            "hash": "65f2813f83616c9e43625873fcc80fdf522aca66d560600d6edb721366efb781"
         }
     },
     "installer": {
