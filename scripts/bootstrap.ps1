@@ -183,12 +183,43 @@ function Install-WinMoiPackages {
     }
 
     if ($UpdatePackages) {
+        $shimDir = Join-Path $Manifest.ScoopRoot "shims"
         if ($PSCmdlet.ShouldProcess($Manifest.ScoopRoot, "Update all installed Scoop packages (scoop update *)")) {
+            if (Test-Path -LiteralPath $shimDir) {
+                Get-ChildItem -LiteralPath $shimDir -Filter "*.winmoi-old-*" -File -ErrorAction SilentlyContinue | ForEach-Object {
+                    Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
+                }
+                Get-ChildItem -LiteralPath $shimDir -Filter "*.exe" -File | ForEach-Object {
+                    $locked = $false
+                    try {
+                        $stream = $_.Open([IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+                        $stream.Close()
+                    }
+                    catch {
+                        $locked = $true
+                    }
+                    if ($locked) {
+                        $backupPath = "$($_.FullName).winmoi-old-$([guid]::NewGuid().ToString('N'))"
+                        Move-Item -LiteralPath $_.FullName -Destination $backupPath -Force
+                        Copy-Item -LiteralPath $backupPath -Destination $_.FullName -Force
+                    }
+                }
+            }
             Invoke-Scoop $Scoop @("update", "*")
         }
         if ($PSCmdlet.ShouldProcess($Manifest.ScoopRoot, "Clean up old Scoop package versions (scoop cleanup *)")) {
-            try { & $Scoop cleanup * } catch { Write-Host "`nDeferred cleanup for in-use old version(s): $($_.Exception.Message)" }
+            foreach ($app in @(Get-ChildItem -LiteralPath (Join-Path $Manifest.ScoopRoot "apps") -Directory -ErrorAction SilentlyContinue)) {
+                if ($app.Name -eq "scoop") { continue }
+                $oldDirs = @(Get-ChildItem -LiteralPath $app.FullName -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "current" })
+                if ($oldDirs.Count -le 1) { continue }
+                try { & $Scoop cleanup $app.Name } catch { Write-Host "`nDeferred cleanup for in-use old version of '$($app.Name)': $($_.Exception.Message)" }
+            }
             $global:LASTEXITCODE = 0
+            if (Test-Path -LiteralPath $shimDir) {
+                Get-ChildItem -LiteralPath $shimDir -Filter "*.winmoi-old-*" -File -ErrorAction SilentlyContinue | ForEach-Object {
+                    Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
+                }
+            }
         }
     }
 }
