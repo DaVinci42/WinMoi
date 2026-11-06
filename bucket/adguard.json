@@ -1,5 +1,5 @@
 {
-    "version": "8.0.3",
+    "version": "8.0.4",
     "description": "System-wide ad, tracker, phishing, and malware blocker for Windows.",
     "homepage": "https://adguard.com/en/adguard-windows/overview.html",
     "license": {
@@ -7,7 +7,7 @@
         "url": "https://adguard.com/en/eula.html"
     },
     "url": "https://static.adtidy.org/windows/setup.exe#/setup.exe",
-    "hash": "7f499a0e196f9b09ee1a2d87c98e418e6b44caa381cfa4ea29ed9d9d48b54949",
+    "hash": "37287b28a7742d954a62577d7b434aba3bd900ccb782ea8f235a5556fb742fbe",
     "installer": {
         "script": "Invoke-ExternalCommand \"$dir\\setup.exe\" -ArgumentList '-quiet' -RunAs | Out-Null"
     },
