@@ -1,11 +1,11 @@
 {
-    "version": "1.7.6",
+    "version": "1.8.1",
     "description": "CLI for the open agent skills ecosystem.",
     "homepage": "https://skills.sh",
     "license": "MIT",
     "depends": "nodejs",
-    "url": "https://registry.npmjs.org/skills/-/skills-1.7.6.tgz",
-    "hash": "7ab1d2a52f1e0058d2f7d4f425821e6346ce90526304594f2275f008b816563e",
+    "url": "https://registry.npmjs.org/skills/-/skills-1.8.1.tgz",
+    "hash": "e4757551dc15dc05a0bf12b74eccd29cba7d2b08221325661d083f8703f9db5e",
     "installer": {
         "script": [
             "Push-Location \"$dir\\package\"",
