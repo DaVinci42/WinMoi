@@ -1,0 +1,46 @@
+version: 2
+
+project_name: winmoi
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: winmoi
+    main: ./cmd/winmoi
+    binary: winmoi
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/davinci42/WinMoi/internal/cli.Version={{.Version}}
+
+archives:
+  - id: default
+    formats:
+      - zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+scoops:
+  - name: winmoi
+    directory: bucket
+    homepage: https://github.com/davinci42/WinMoi
+    description: Windows user-level declarative Scoop, config links, and Agent Skills CLI
+    license: MIT
+    repository:
+      owner: davinci42
+      name: WinMoi
+      branch: main
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"

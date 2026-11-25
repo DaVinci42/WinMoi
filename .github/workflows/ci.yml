@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test -v ./...
+      - name: Build windows amd64 & arm64
+        shell: pwsh
+        run: |
+          $env:CGO_ENABLED = "0"
+          $env:GOOS = "windows"
+          $env:GOARCH = "amd64"
+          go build -o dist/winmoi-amd64.exe ./cmd/winmoi
+          $env:GOARCH = "arm64"
+          go build -o dist/winmoi-arm64.exe ./cmd/winmoi
+
+  test-unix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Vet & Test
+        run: |
+          go vet ./...
+          go test -v ./...
+      - name: Cross-compile Windows
+        run: |
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./...
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build ./...

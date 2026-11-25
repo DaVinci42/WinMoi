@@ -1,0 +1,31 @@
+{
+    "version": "0.1.0",
+    "description": "Windows user-level declarative Scoop, config links, and Agent Skills CLI",
+    "homepage": "https://github.com/davinci42/WinMoi",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/davinci42/WinMoi/releases/download/v0.1.0/winmoi_0.1.0_windows_amd64.zip",
+            "hash": ""
+        },
+        "arm64": {
+            "url": "https://github.com/davinci42/WinMoi/releases/download/v0.1.0/winmoi_0.1.0_windows_arm64.zip",
+            "hash": ""
+        }
+    },
+    "bin": "winmoi.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/davinci42/WinMoi/releases/download/v$version/winmoi_$version_windows_amd64.zip"
+            },
+            "arm64": {
+                "url": "https://github.com/davinci42/WinMoi/releases/download/v$version/winmoi_$version_windows_arm64.zip"
+            }
+        },
+        "hash": {
+            "url": "$baseurl/checksums.txt"
+        }
+    }
+}

@@ -1,0 +1,4 @@
+dist/
+/winmoi
+/winmoi.exe
+coverage.out

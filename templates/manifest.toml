@@ -1,0 +1,58 @@
+[scoop]
+root = "D:\\Scoop"
+
+[[scoop.buckets]]
+name = "main"
+
+[[scoop.buckets]]
+name = "extras"
+
+[[scoop.buckets]]
+name = "winmoi"
+url = "https://github.com/davinci42/WinMoi.git"
+
+[env]
+XDG_CONFIG_HOME = "${USERPROFILE}/.config"
+
+[config_repo]
+# url = "git@github.com:you/your-winmoi-config.git"
+local_path = "."
+branch = "main"
+
+# Standalone config links (not bound to a specific Scoop package)
+# [[links]]
+# from = "configs/powershell/profile.ps1"
+# to = "${USERPROFILE}/Documents/PowerShell/Microsoft.PowerShell_profile.ps1"
+# type = "symlink"
+
+# Declarative Scoop packages with optional bidirectional config_to or file links
+[[packages]]
+name = "git"
+# links = [
+#   { from = "configs/git/.gitconfig", to = "~/.gitconfig", type = "symlink" },
+# ]
+
+[[packages]]
+name = "nodejs-lts"
+
+# [[packages]]
+# name = "neovim"
+# config_to = "${LOCALAPPDATA}/nvim" # links configs/neovim <-> target (adopts existing target on first apply)
+
+# Keep winmoi updated via Scoop
+[[packages]]
+name = "winmoi/winmoi"
+
+# Unified ~/.agents/skills management (local private skills + upstream CLI skills)
+[skills]
+local_dir = "agent/skills"
+validate = true
+tool = "npx skills"
+extra_args = ["-g", "-y"]
+upstream = [
+  # "vercel-labs/agent-skills",
+  # "anthropics/skills@pdf",
+]
+
+[clean]
+keep_versions = 2
