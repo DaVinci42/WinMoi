@@ -1,31 +1,22 @@
 {
     "version": "0.1.0",
-    "description": "Windows user-level declarative Scoop, config links, and Agent Skills CLI",
-    "homepage": "https://github.com/davinci42/WinMoi",
-    "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/davinci42/WinMoi/releases/download/v0.1.0/winmoi_0.1.0_windows_amd64.zip",
-            "hash": ""
+            "url": "https://github.com/DaVinci42/WinMoi/releases/download/v0.1.0/winmoi_0.1.0_windows_amd64.zip",
+            "bin": [
+                "winmoi.exe"
+            ],
+            "hash": "61b285ea69122f48b40bd73e26b70d19e4e5d57d55d8632146b22a31e73d38d0"
         },
         "arm64": {
-            "url": "https://github.com/davinci42/WinMoi/releases/download/v0.1.0/winmoi_0.1.0_windows_arm64.zip",
-            "hash": ""
+            "url": "https://github.com/DaVinci42/WinMoi/releases/download/v0.1.0/winmoi_0.1.0_windows_arm64.zip",
+            "bin": [
+                "winmoi.exe"
+            ],
+            "hash": "4ca93af3b827547675aecefaacdc7b5c4e5f37cd0f5b41a8afce53d3f3f1ede0"
         }
     },
-    "bin": "winmoi.exe",
-    "checkver": "github",
-    "autoupdate": {
-        "architecture": {
-            "64bit": {
-                "url": "https://github.com/davinci42/WinMoi/releases/download/v$version/winmoi_$version_windows_amd64.zip"
-            },
-            "arm64": {
-                "url": "https://github.com/davinci42/WinMoi/releases/download/v$version/winmoi_$version_windows_arm64.zip"
-            }
-        },
-        "hash": {
-            "url": "$baseurl/checksums.txt"
-        }
-    }
+    "homepage": "https://github.com/davinci42/WinMoi",
+    "license": "MIT",
+    "description": "Windows user-level declarative Scoop, config links, and Agent Skills CLI"
 }
